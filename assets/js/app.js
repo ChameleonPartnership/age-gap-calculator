@@ -3,7 +3,8 @@
 
   var STORAGE_KEYS = {
     theme: "ageGapTheme",
-    history: "ageGapHistory"
+    history: "ageGapHistory",
+    cookieConsent: "ageGapCookieConsent"
   };
 
   // Customization point: compatibility thresholds and labels.
@@ -51,6 +52,7 @@
     setupTheme();
     setupCalculator();
     setupKeyboardShortcuts();
+    setupCookieConsent();
     renderHistory();
   });
 
@@ -149,6 +151,36 @@
         calculateAndRender();
       }
     });
+  }
+
+  function setupCookieConsent() {
+    if (localStorage.getItem(STORAGE_KEYS.cookieConsent)) {
+      return;
+    }
+
+    var privacyHref = location.pathname.indexOf("/blog/") !== -1 ? "../privacy.html" : "privacy.html";
+    var banner = document.createElement("section");
+    banner.className = "cookie-banner";
+    banner.setAttribute("aria-label", "Cookie notice");
+    banner.innerHTML =
+      '<p>Age Gap Calculator uses local browser storage and may show Google ads that use cookies. See our <a href="' +
+      privacyHref +
+      '">Privacy Policy</a>.</p>' +
+      '<div class="cookie-actions">' +
+      '<button type="button" class="secondary-button" data-cookie-choice="declined">Decline</button>' +
+      '<button type="button" class="primary-button" data-cookie-choice="accepted">Accept</button>' +
+      "</div>";
+
+    banner.addEventListener("click", function (event) {
+      var choice = event.target && event.target.getAttribute("data-cookie-choice");
+      if (!choice) {
+        return;
+      }
+      localStorage.setItem(STORAGE_KEYS.cookieConsent, choice);
+      banner.remove();
+    });
+
+    document.body.appendChild(banner);
   }
 
   function clearInputs() {
